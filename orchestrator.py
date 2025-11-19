@@ -29,19 +29,15 @@ tags = tag_report(report_text, llm, prompt_template=agent_1_template)
 print(tags)
 print("--- Agent 1: Tagger Complete ---\n")
 
-<<<<<<< HEAD
-# Agent 2 processing
-=======
 if (tags.needs_downstream_disease_analysis == False):
     print("Skipping Agent 2 and 3 as no downstream disease analysis is needed.")
     exit(0)
 
 # Agent 2 processing
 
->>>>>>> 82ed600 (all helper agents finished)
 print("--- Running Agent 2: Classifier ---")
 agent_2_template = open("prompts/classifier_prompt.txt").read()
-classification = classify_report(report_text, tags.dict(), llm, prompt_template=agent_2_template)
+classification = classify_report(report_text, tags.model_dump(), llm, prompt_template=agent_2_template)
 print(classification)
 print("--- Agent 2: Classifier Complete ---\n")
 
