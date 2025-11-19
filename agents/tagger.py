@@ -2,7 +2,6 @@ from typing import Optional
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
-import warnings
 
 class Tags(BaseModel):
     exam_modality: str = Field(..., description="High-level imaging type.")
@@ -14,8 +13,6 @@ class Tags(BaseModel):
     needs_downstream_disease_analysis: bool = Field(..., description="Boolean indicating if downstream analysis is needed.")
 
 def tag_report(report_text: str, llm: ChatGoogleGenerativeAI, prompt_template: str) -> Tags:
-
-    warnings.filterwarnings("ignore", message="Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.*")
 
     try:
         # Create structured LLM with Pydantic schema
