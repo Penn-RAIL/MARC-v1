@@ -1,55 +1,55 @@
-import warnings
-warnings.filterwarnings("ignore", message="Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.*")
+from typing import Dict, Optional
 
-import dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
-import pandas as pd
-from agents.tagger import tag_report
-from agents.classifier import classify_report
-from agents.recommender import recommend_follow_up
+from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, Field
 
-def create_llm():
-    """Create and return the LLM instance (called once)."""
-    dotenv.load_dotenv()
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
-    return llm
 
-# get csv data
-report = pd.read_csv("data/healthy_chest_ct_synthetic_radiology_reports.csv")
+class RadiologistEvaluation(BaseModel):
+    classification_score: float = Field(
+        ..., description="Score (0-1) for disease classification accuracy and alignment with report findings."
+    )
+    impression_score: float = Field(
+        ..., description="Score (0-1) reflecting the clinical coherence and clarity of the impression."
+    )
+    impression_reasoning: str = Field(..., description="Radiologist rationale supporting the impression score.")
+    follow_up_recommended: bool = Field(
+        ..., description="Whether the radiologist agrees a follow-up is needed based on the report."
+    )
+    follow_up_reasoning: str = Field(..., description="Reasoning behind the yes/no follow-up decision.")
+    overall_report_score: float = Field(
+        ..., description="Overall radiologist quality score (0-1) considering safety and clinical actionability."
+    )
+    additional_notes: Optional[str] = Field(
+        None, description="Optional concise notes on safety flags or alignment issues."
+    )
 
-# get first report
-report_text = report.iloc[0]["Report"]
 
-llm = create_llm()
+def evaluate_report(
+    report_text: str,
+    tags: Dict,
+    classification: Optional[Dict],
+    recommendations: Optional[Dict],
+    llm: ChatGoogleGenerativeAI,
+    prompt_template: str,
+) -> RadiologistEvaluation:
+    """
+    Final radiologist role evaluator that synthesizes upstream agent outputs and the source report,
+    producing four grades: classification quality, impression quality (with reasoning), a yes/no
+    follow-up decision (with reasoning), and an overall report quality score.
+    """
+    try:
+        structured_llm = llm.with_structured_output(RadiologistEvaluation)
 
-# Agent 1 processing
-print("--- Running Agent 1: Tagger ---")
-agent_1_template = open("prompts/tagger_prompt.txt").read()
-tags = tag_report(report_text, llm, prompt_template=agent_1_template)
-print(tags)
-print("--- Agent 1: Tagger Complete ---\n")
+        prompt = ChatPromptTemplate.from_template(prompt_template)
+        formatted_prompt = prompt.format(
+            report_text=report_text,
+            tags=tags,
+            classification=classification or {},
+            recommendations=recommendations or {},
+        )
 
-if (tags.needs_downstream_disease_analysis == False):
-    print("Skipping Agent 2 and 3 as no downstream disease analysis is needed.")
-    exit(0)
-
-# Agent 2 processing
-
-print("--- Running Agent 2: Classifier ---")
-agent_2_template = open("prompts/classifier_prompt.txt").read()
-classification = classify_report(report_text, tags.model_dump(), llm, prompt_template=agent_2_template)
-print(classification)
-print("--- Agent 2: Classifier Complete ---\n")
-
-# Agent 3 processing
-print("--- Running Agent 3: Recommender ---")
-agent_3_template = open("prompts/recommender_prompt.txt").read()
-recommendations = recommend_follow_up(
-    disease_type=classification.disease_type,
-    impression=classification.impression,
-    reason=classification.reasoning,
-    llm=llm,
-    prompt_template=agent_3_template
-)
-print(recommendations)
-print("--- Agent 3: Recommender Complete ---")
+        result = structured_llm.invoke(formatted_prompt)
+        return result
+    except Exception as e:
+        raise ValueError(f"Failed to evaluate report: {str(e)}") from e
