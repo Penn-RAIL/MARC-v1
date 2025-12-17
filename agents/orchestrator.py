@@ -26,30 +26,30 @@ class RadiologistEvaluation(BaseModel):
 
 
 def evaluate_report(
-    report_text: str,
+    actual_report_text: str,
     tags: Dict,
     classification: Optional[Dict],
     recommendations: Optional[Dict],
     llm: ChatGoogleGenerativeAI,
     prompt_template: str,
-    original_report_text: str,  
 ) -> RadiologistEvaluation:
     """
-    Final radiologist role evaluator that synthesizes upstream agent outputs and the source report,
+    Final radiologist role evaluator that synthesizes upstream agent outputs and the actual report,
     producing four grades: classification quality, impression quality (with reasoning), a yes/no
     follow-up decision (with reasoning), and an overall report quality score.
     
     Args:
-        report_text: The masked/processed report text used by agents
-        original_report_text: The unmasked original report for comparison/ground truth
+        actual_report_text: The unmasked original report for comparison/ground truth
+        tags: Agent 1 generated tags
+        classification: Agent 2 generated classification (disease type, impression, reasoning)
+        recommendations: Agent 3 generated follow-up recommendations
     """
     try:
         structured_llm = llm.with_structured_output(RadiologistEvaluation)
 
         prompt = ChatPromptTemplate.from_template(prompt_template)
         formatted_prompt = prompt.format(
-            report_text=report_text,
-            original_report_text=original_report_text,
+            actual_report_text=actual_report_text,
             tags=tags,
             classification=classification or {},
             recommendations=recommendations or {},

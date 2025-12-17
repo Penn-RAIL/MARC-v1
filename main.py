@@ -27,60 +27,140 @@ def create_llm():
     llm = ChatGoogleGenerativeAI(model=model_name)
     return llm
 
-# get csv data - both masked (for processing) and unmasked (for evaluation)
+def process_report(masked_text: str, original_text: str, llm, prompts: dict, index: int) -> dict:
+    """Process a single report through all 4 agents."""
+    print(f"\n{'='*60}")
+    print(f"Processing Report {index + 1}")
+    print(f"{'='*60}")
+    
+    # Agent 1 processing
+    print("--- Running Agent 1: Tagger ---")
+    tags = tag_report(masked_text, llm, prompt_template=prompts['tagger'])
+    print(tags)
+    print("--- Agent 1: Tagger Complete ---\n")
+
+    if not tags.needs_downstream_disease_analysis:
+        print("Skipping Agent 2 and 3 as no downstream disease analysis is needed.")
+        return {
+            'report_index': index,
+            'tags': tags.model_dump(),
+            'classification': None,
+            'recommendations': None,
+            'evaluation': None,
+            'skipped': True
+        }
+
+    # Agent 2 processing
+    print("--- Running Agent 2: Classifier ---")
+    classification = classify_report(masked_text, tags.model_dump(), llm, prompt_template=prompts['classifier'])
+    print(classification)
+    print("--- Agent 2: Classifier Complete ---\n")
+
+    # Agent 3 processing
+    print("--- Running Agent 3: Recommender ---")
+    recommendations = recommend_follow_up(
+        disease_type=classification.disease_type,
+        impression=classification.impression,
+        reason=classification.reasoning,
+        llm=llm,
+        prompt_template=prompts['recommender']
+    )
+    print(recommendations)
+    print("--- Agent 3: Recommender Complete ---\n")
+
+    # Agent 4 processing
+    print("--- Running Agent 4: Final Evaluator ---")
+    final_evaluation = evaluate_report(
+        actual_report_text=original_text,
+        tags=tags.model_dump(),
+        classification=classification.model_dump(),
+        recommendations=recommendations.model_dump(),
+        llm=llm,
+        prompt_template=prompts['evaluator'],
+    )
+    print(final_evaluation)
+    print("--- Agent 4: Final Evaluator Complete ---")
+    
+    return {
+        'report_index': index,
+        'tags': tags.model_dump(),
+        'classification': classification.model_dump(),
+        'recommendations': recommendations.model_dump(),
+        'evaluation': final_evaluation.model_dump(),
+        'skipped': False
+    }
+
+# Load CSV data
 masked_report = pd.read_csv("data/postive_chest_ct_synthetic_radiology_reports_masked.csv")
 unmasked_report = pd.read_csv("data/postive_chest_ct_synthetic_radiology_reports.csv")
 
-# get first report (masked for agent processing)
-report_text = masked_report.iloc[0]["Report"]
-# get first report (unmasked original for evaluation/comparison)
-original_report_text = unmasked_report.iloc[0]["Report"]
-
+# Initialize LLM
 llm = create_llm()
 
-# Agent 1 processing
-print("--- Running Agent 1: Tagger ---")
-agent_1_template = open("prompts/tagger_prompt.txt").read()
-tags = tag_report(report_text, llm, prompt_template=agent_1_template)
-print(tags)
-print("--- Agent 1: Tagger Complete ---\n")
+# Load all prompts once
+prompts = {
+    'tagger': open("prompts/tagger_prompt.txt").read(),
+    'classifier': open("prompts/classifier_prompt.txt").read(),
+    'recommender': open("prompts/recommender_prompt.txt").read(),
+    'evaluator': open("prompts/final_evaluator_prompt.txt").read()
+}
 
-if (tags.needs_downstream_disease_analysis == False):
-    print("Skipping Agent 2 and 3 as no downstream disease analysis is needed.")
-    exit(0)
+# Process first 100 reports
+results = []
+num_reports = min(100, len(masked_report))
 
-# Agent 2 processing
+for i in range(num_reports):
+    masked_text = masked_report.iloc[i]["Report"]
+    original_text = unmasked_report.iloc[i]["Report"]
+    
+    result = process_report(masked_text, original_text, llm, prompts, i)
+    results.append(result)
 
-print("--- Running Agent 2: Classifier ---")
-agent_2_template = open("prompts/classifier_prompt.txt").read()
-classification = classify_report(report_text, tags.model_dump(), llm, prompt_template=agent_2_template)
-print(classification)
-print("--- Agent 2: Classifier Complete ---\n")
+# Create results DataFrame
+results_data = []
+for r in results:
+    if r['skipped']:
+        continue
+    
+    eval_data = r['evaluation']
+    results_data.append({
+        'report_index': r['report_index'],
+        'classification_score': eval_data['classification_score'],
+        'impression_score': eval_data['impression_score'],
+        'overall_report_score': eval_data['overall_report_score'],
+        'follow_up_recommended': eval_data['follow_up_recommended'],
+        'impression_reasoning': eval_data['impression_reasoning'],
+        'follow_up_reasoning': eval_data['follow_up_reasoning'],
+        'additional_notes': eval_data.get('additional_notes', ''),
+        'disease_type': r['classification']['disease_type'],
+        'impression': r['classification']['impression'],
+        'recommendations': str(r['recommendations']['recommendations'])
+    })
 
-# Agent 3 processing
-print("--- Running Agent 3: Recommender ---")
-agent_3_template = open("prompts/recommender_prompt.txt").read()
-recommendations = recommend_follow_up(
-    disease_type=classification.disease_type,
-    impression=classification.impression,
-    reason=classification.reasoning,
-    llm=llm,
-    prompt_template=agent_3_template
-)
-print(recommendations)
-print("--- Agent 3: Recommender Complete ---\n")
+results_df = pd.DataFrame(results_data)
+results_df.to_csv("logs/evaluation_results.csv", index=False)
 
-# Agent 4 processing
-print("--- Running Agent 4: Final Evaluator ---")
-agent_4_template = open("prompts/final_evaluator_prompt.txt").read()
-final_evaluation = evaluate_report(
-    report_text=report_text,
-    original_report_text=original_report_text,
-    tags=tags.model_dump(),
-    classification=classification.model_dump(),
-    recommendations=recommendations.model_dump(),
-    llm=llm,
-    prompt_template=agent_4_template,
-)
-print(final_evaluation)
-print("--- Agent 4: Final Evaluator Complete ---")
+# Calculate summary statistics
+print(f"\n{'='*60}")
+print("SUMMARY STATISTICS")
+print(f"{'='*60}")
+print(f"Total reports processed: {len(results_data)}/{num_reports}")
+
+if len(results_data) > 0:
+    correct_count = (results_df['overall_report_score'] > 0.9).sum()
+    acceptable_count = (results_df['overall_report_score'] >= 0.8).sum()
+    perfect_count = (results_df['overall_report_score'] == 1.0).sum()
+    
+    print(f"\nOverall Report Score:")
+    print(f"  Acceptable (>= 0.8): {acceptable_count}/{len(results_data)}")
+    print(f"  Correct (> 0.9): {correct_count}/{len(results_data)}")
+    print(f"  Perfect (= 1.0): {perfect_count}/{len(results_data)}")
+    
+    print(f"\nMean Scores:")
+    print(f"  Classification Score: {results_df['classification_score'].mean():.3f}")
+    print(f"  Impression Score: {results_df['impression_score'].mean():.3f}")
+    print(f"  Overall Report Score: {results_df['overall_report_score'].mean():.3f}")
+    
+    print(f"\nResults saved to: logs/evaluation_results.csv")
+else:
+    print("No reports were fully processed (all skipped)")
