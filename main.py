@@ -27,11 +27,14 @@ def create_llm():
     llm = ChatGoogleGenerativeAI(model=model_name)
     return llm
 
-# get csv data
-report = pd.read_csv("data/postive_chest_ct_synthetic_radiology_reports_masked.csv")
+# get csv data - both masked (for processing) and unmasked (for evaluation)
+masked_report = pd.read_csv("data/postive_chest_ct_synthetic_radiology_reports_masked.csv")
+unmasked_report = pd.read_csv("data/postive_chest_ct_synthetic_radiology_reports.csv")
 
-# get first report
-report_text = report.iloc[0]["Report"]
+# get first report (masked for agent processing)
+report_text = masked_report.iloc[0]["Report"]
+# get first report (unmasked original for evaluation/comparison)
+original_report_text = unmasked_report.iloc[0]["Report"]
 
 llm = create_llm()
 
@@ -72,6 +75,7 @@ print("--- Running Agent 4: Final Evaluator ---")
 agent_4_template = open("prompts/final_evaluator_prompt.txt").read()
 final_evaluation = evaluate_report(
     report_text=report_text,
+    original_report_text=original_report_text,
     tags=tags.model_dump(),
     classification=classification.model_dump(),
     recommendations=recommendations.model_dump(),
