@@ -12,9 +12,18 @@ class Tags(BaseModel):
     exam_type_string: str = Field(..., description="Free-text normalized label Agent 1 composes.")
     needs_downstream_disease_analysis: bool = Field(..., description="Boolean indicating if downstream analysis is needed.")
 
-def tag_report(report_text: str, llm: ChatGoogleGenerativeAI, prompt_template: str) -> Tags:
+def tag_report(report_text: str, llm: ChatGoogleGenerativeAI, prompt_template: str, feedback: Optional[str] = None) -> Tags:
 
     try:
+        # Add feedback to prompt if provided
+        if feedback:
+            prompt_template = f"""{prompt_template}
+
+--- FEEDBACK FROM PREVIOUS ATTEMPT ---
+{feedback}
+
+Please address the issues above in your tagging."""
+        
         # Create structured LLM with Pydantic schema
         structured_llm = llm.with_structured_output(Tags)
         

@@ -10,9 +10,18 @@ class Classification(BaseModel):
     impression: str = Field(..., description="A concise summary of the key findings.")
     reasoning: str = Field(..., description="The rationale behind the classification decisions.")
 
-def classify_report(report_text: str, tags: dict, llm: ChatGoogleGenerativeAI, prompt_template: str) -> Classification:
+def classify_report(report_text: str, tags: dict, llm: ChatGoogleGenerativeAI, prompt_template: str, feedback: Optional[str] = None) -> Classification:
 
     try:
+        # Add feedback to prompt if provided
+        if feedback:
+            prompt_template = f"""{prompt_template}
+
+--- FEEDBACK FROM PREVIOUS ATTEMPT ---
+{feedback}
+
+Please address the issues above in your classification."""
+        
         # Create structured LLM with Pydantic schema
         structured_llm = llm.with_structured_output(Classification)
         

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
@@ -11,12 +11,22 @@ def recommend_follow_up(
     impression: str, 
     reason: str, 
     llm: ChatGoogleGenerativeAI, 
-    prompt_template: str
+    prompt_template: str,
+    feedback: Optional[str] = None
 ) -> Recommendation:
     """
     Generates follow-up recommendations based on disease type, impression, and reason.
     """
     try:
+        # Add feedback to prompt if provided
+        if feedback:
+            prompt_template = f"""{prompt_template}
+
+--- FEEDBACK FROM PREVIOUS ATTEMPT ---
+{feedback}
+
+Please address the issues above in your recommendations."""
+        
         # Create a structured LLM with the Pydantic schema
         structured_llm = llm.with_structured_output(Recommendation)
         
