@@ -1,0 +1,24 @@
+# Include all prompt templates
+include prompts/*.txt
+
+# Include data files
+include data/*.csv
+
+# Include documentation
+include readme.md
+include README.md
+include LICENSE
+include FEEDBACK_LOOP_TEST_RESULTS.md
+
+# Include configuration examples
+include .env.example
+
+# Include test files
+include test_feedback_loop.py
+include test_feedback_loop_strict.py
+
+# Exclude sensitive files
+exclude .env
+exclude keys.env
+global-exclude *.pyc
+global-exclude __pycache__

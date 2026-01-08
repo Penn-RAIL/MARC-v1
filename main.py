@@ -197,35 +197,124 @@ for r in results:
         'recommendations': str(r['recommendations']['recommendations'])
     })
 
-results_df = pd.DataFrame(results_data)
-results_df.to_csv("logs/evaluation_results.csv", index=False)
+    results_df = pd.DataFrame(results_data)
+    results_df.to_csv("logs/evaluation_results.csv", index=False)
 
-# Calculate summary statistics
-print(f"\n{'='*60}")
-print("SUMMARY STATISTICS")
-print(f"{'='*60}")
-print(f"Total reports processed: {len(results_data)}/{num_reports}")
+    # Calculate summary statistics
+    print(f"\n{'='*60}")
+    print("SUMMARY STATISTICS")
+    print(f"{'='*60}")
+    print(f"Total reports processed: {len(results_data)}/{num_reports}")
 
-if len(results_data) > 0:
-    correct_count = (results_df['overall_report_score'] > 0.9).sum()
-    acceptable_count = (results_df['overall_report_score'] >= 0.8).sum()
-    perfect_count = (results_df['overall_report_score'] == 1.0).sum()
-    
-    print(f"\nOverall Report Score:")
-    print(f"  Acceptable (>= 0.8): {acceptable_count}/{len(results_data)}")
-    print(f"  Correct (> 0.9): {correct_count}/{len(results_data)}")
-    print(f"  Perfect (= 1.0): {perfect_count}/{len(results_data)}")
-    
-    print(f"\nMean Scores:")
-    print(f"  Classification Score: {results_df['classification_score'].mean():.3f}")
-    print(f"  Impression Score: {results_df['impression_score'].mean():.3f}")
-    print(f"  Overall Report Score: {results_df['overall_report_score'].mean():.3f}")
-    
-    print(f"\nIteration Statistics:")
-    print(f"  Mean iterations: {results_df['iterations'].mean():.2f}")
-    print(f"  Reports requiring refinement: {(results_df['iterations'] > 1).sum()}/{len(results_data)}")
-    print(f"  Max iterations reached: {(results_df['warning'] != '').sum()}/{len(results_data)}")
-    
-    print(f"\nResults saved to: logs/evaluation_results.csv")
-else:
-    print("No reports were fully processed (all skipped)")
+    if len(results_data) > 0:
+        correct_count = (results_df['overall_report_score'] > 0.9).sum()
+        acceptable_count = (results_df['overall_report_score'] >= 0.8).sum()
+        perfect_count = (results_df['overall_report_score'] == 1.0).sum()
+        
+        print(f"\nOverall Report Score:")
+        print(f"  Acceptable (>= 0.8): {acceptable_count}/{len(results_data)}")
+        print(f"  Correct (> 0.9): {correct_count}/{len(results_data)}")
+        print(f"  Perfect (= 1.0): {perfect_count}/{len(results_data)}")
+        
+        print(f"\nMean Scores:")
+        print(f"  Classification Score: {results_df['classification_score'].mean():.3f}")
+        print(f"  Impression Score: {results_df['impression_score'].mean():.3f}")
+        print(f"  Overall Report Score: {results_df['overall_report_score'].mean():.3f}")
+        
+        print(f"\nIteration Statistics:")
+        print(f"  Mean iterations: {results_df['iterations'].mean():.2f}")
+        print(f"  Reports requiring refinement: {(results_df['iterations'] > 1).sum()}/{len(results_data)}")
+        print(f"  Max iterations reached: {(results_df['warning'] != '').sum()}/{len(results_data)}")
+        
+        print(f"\nResults saved to: logs/evaluation_results.csv")
+    else:
+        print("No reports were fully processed (all skipped)")
+
+
+def main():
+    """Main entry point for the report classifier."""
+    # Load CSV data
+    masked_report = pd.read_csv("data/postive_chest_ct_synthetic_radiology_reports_masked.csv")
+    unmasked_report = pd.read_csv("data/postive_chest_ct_synthetic_radiology_reports.csv")
+
+    # Initialize LLM
+    llm = create_llm()
+
+    # Load all prompts once
+    prompts = {
+        'tagger': open("prompts/tagger_prompt.txt").read(),
+        'classifier': open("prompts/classifier_prompt.txt").read(),
+        'recommender': open("prompts/recommender_prompt.txt").read(),
+        'evaluator': open("prompts/final_evaluator_prompt.txt").read()
+    }
+
+    # Process first 100 reports
+    results = []
+    num_reports = min(100, len(masked_report))
+
+    for i in range(num_reports):
+        masked_text = masked_report.iloc[i]["Report"]
+        original_text = unmasked_report.iloc[i]["Report"]
+        
+        result = process_report(masked_text, original_text, llm, prompts, i)
+        results.append(result)
+
+    # Create results DataFrame
+    results_data = []
+    for r in results:
+        if r['skipped']:
+            continue
+        
+        eval_data = r['evaluation']
+        results_data.append({
+            'report_index': r['report_index'],
+            'iterations': r['iterations'],
+            'classification_score': eval_data['classification_score'],
+            'impression_score': eval_data['impression_score'],
+            'overall_report_score': eval_data['overall_report_score'],
+            'follow_up_recommended': eval_data['follow_up_recommended'],
+            'impression_reasoning': eval_data['impression_reasoning'],
+            'follow_up_reasoning': eval_data['follow_up_reasoning'],
+            'additional_notes': eval_data.get('additional_notes', ''),
+            'warning': r.get('warning', ''),
+            'disease_type': r['classification']['disease_type'],
+            'impression': r['classification']['impression'],
+            'recommendations': str(r['recommendations']['recommendations'])
+        })
+
+    results_df = pd.DataFrame(results_data)
+    results_df.to_csv("logs/evaluation_results.csv", index=False)
+
+    # Calculate summary statistics
+    print(f"\n{'='*60}")
+    print("SUMMARY STATISTICS")
+    print(f"{'='*60}")
+    print(f"Total reports processed: {len(results_data)}/{num_reports}")
+
+    if len(results_data) > 0:
+        correct_count = (results_df['overall_report_score'] > 0.9).sum()
+        acceptable_count = (results_df['overall_report_score'] >= 0.8).sum()
+        perfect_count = (results_df['overall_report_score'] == 1.0).sum()
+        
+        print(f"\nOverall Report Score:")
+        print(f"  Acceptable (>= 0.8): {acceptable_count}/{len(results_data)}")
+        print(f"  Correct (> 0.9): {correct_count}/{len(results_data)}")
+        print(f"  Perfect (= 1.0): {perfect_count}/{len(results_data)}")
+        
+        print(f"\nMean Scores:")
+        print(f"  Classification Score: {results_df['classification_score'].mean():.3f}")
+        print(f"  Impression Score: {results_df['impression_score'].mean():.3f}")
+        print(f"  Overall Report Score: {results_df['overall_report_score'].mean():.3f}")
+        
+        print(f"\nIteration Statistics:")
+        print(f"  Mean iterations: {results_df['iterations'].mean():.2f}")
+        print(f"  Reports requiring refinement: {(results_df['iterations'] > 1).sum()}/{len(results_data)}")
+        print(f"  Max iterations reached: {(results_df['warning'] != '').sum()}/{len(results_data)}")
+        
+        print(f"\nResults saved to: logs/evaluation_results.csv")
+    else:
+        print("No reports were fully processed (all skipped)")
+
+
+if __name__ == "__main__":
+    main()
