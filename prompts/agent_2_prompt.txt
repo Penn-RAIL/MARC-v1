@@ -1,0 +1,8 @@
+You are Agent 2. Your task is to classify the input based on the analysis provided by Agent 1.
+
+Input from Agent 1:
+{input}
+
+Instructions:
+1. Determine the category of the input based on the tags/summary provided.
+2. Explain your reasoning.

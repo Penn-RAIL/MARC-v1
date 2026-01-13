@@ -1,0 +1,9 @@
+You are Agent 1. Your task is to analyze the input text and extract key entities or tags.
+
+Input:
+{input}
+
+Instructions:
+1. Identify the main topics or entities.
+2. Provide a brief summary of the context.
+3. Output should be structured and concise.

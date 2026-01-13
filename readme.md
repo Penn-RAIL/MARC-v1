@@ -74,11 +74,72 @@ When quality scores fall below the threshold:
     pip install -r requirements.txt
     ```
 
-4. **Configure API key**
+4.  **Configure API key**
     ```bash
     cp .env.example .env
     # Edit .env and add your GOOGLE_API_KEY
     ```
+
+### Project Walkthrough
+
+The MARC framework successfully automates complex classification tasks through a multi-agent pipeline. Here is a demonstration of the current system in action:
+
+### Sample Execution Flow
+When a user provides a query (e.g., "Hello?"), the pipeline processes it through sequential stages:
+
+1.  **Tagging Agent**: Extracts key entities and creates a structured summary in JSON format.
+2.  **Classification Agent**: Analyzes the summary and tags to determine the specific category (e.g., "Greeting") and explains its reasoning.
+3.  **Action Agent**: Recommends human-in-the-loop or automated next steps based on the classification.
+
+```text
+--- Agent 1 is working... ---
+Output: { "entities": ["Greeting"], "summary": "User initiated contact." }
+
+--- Agent 2 is working... ---
+Output: Category: Greeting. Reason: The user is initiating a conversation.
+
+--- Agent 3 is working... ---
+Output: Recommendation: Acknowledge the greeting and offer assistance.
+```
+
+### RAG Capabilities
+Agents can be equipped with external knowledge via the `context_files` configuration. For example, `Agent 2` is currently configured to use `data/knowledge/sample_knowledge.txt`, allowing it to reference framework documentation and medical guidelines during its decision-making process.
+
+---
+
+## Customizing Your Agents
+
+You can easily add new agents, change models, or give agents access to external knowledge (RAG) by editing the `config/agents.yaml` file.
+
+### Adding or Modifying Agents
+
+Each agent in the `agents` list in `config/agents.yaml` has the following properties:
+
+-   `name`: The display name of the agent.
+-   `model`: The model ID to use (e.g., `gemini-1.5-flash`, `gemini-1.5-pro`).
+-   `prompt_file`: The filename of the prompt template located in the `prompts/` directory.
+-   `context_files`: (Optional) A list of paths to text files that the agent should use for RAG.
+
+Example configuration:
+
+```yaml
+agents:
+  - name: "Medical Analyst"
+    model: "gemini-1.5-pro"
+    prompt_file: "analyst_prompt.txt"
+    context_files: ["data/knowledge/medical_guidelines.txt"]
+```
+
+### Enabling RAG
+
+To enable RAG for an agent, simply provide a list of file paths in the `context_files` field. The agent will automatically ingest these files and search for relevant information to include in its prompt when processing requests.
+
+### Using Different Models
+
+You can specify different models for different agents. This allows you to use more powerful models for complex tasks and faster, cheaper models for simpler ones. Available models depend on your Google AI Studio account, but common ones include:
+
+-   `gemini-1.5-flash` (Fast and efficient)
+-   `gemini-1.5-pro` (Highly capable for complex reasoning)
 
 ### Usage
 

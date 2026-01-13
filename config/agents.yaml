@@ -1,0 +1,13 @@
+agents:
+  - name: "Agent 1"
+    model: "gemini-2.0-flash"
+    prompt_file: "agent_1_prompt.txt"
+    context_files: []
+  - name: "Agent 2"
+    model: "gemini-2.0-flash"
+    prompt_file: "agent_2_prompt.txt"
+    context_files: ["data/knowledge/sample_knowledge.txt"]
+  - name: "Agent 3"
+    model: "gemini-2.0-flash"
+    prompt_file: "agent_3_prompt.txt"
+    context_files: []

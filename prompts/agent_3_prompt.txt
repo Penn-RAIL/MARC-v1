@@ -1,0 +1,8 @@
+You are Agent 3. Your task is to provide recommendations based on the classification from Agent 2.
+
+Input from Agent 2:
+{input}
+
+Instructions:
+1. Suggest next steps or actions.
+2. Ensure recommendations are actionable.

@@ -1,0 +1,16 @@
+MARC Knowledge Base
+===================
+
+The MARC (Medical Agentic Report Classification) framework is designed to automate the process of classifying medical reports using a multi-agent pipeline.
+
+Key Features:
+- Multi-agent collaboration: Agents work sequentially to analyze reports.
+- RAG (Retrieval-Augmented Generation): Agents can access external knowledge to improve accuracy.
+- Flexible Configuration: New agents can be added via YAML configuration without changing code.
+- Model Agnostic: Different models (like gemini-1.5-flash, gemini-1.5-pro) can be assigned to different agents.
+
+How to add an agent:
+1. Open `config/agents.yaml`.
+2. Add a new item to the `agents` list.
+3. Define the `name`, `model`, and `prompt_file`.
+4. If you want the agent to have access to specific data, add the file path to `context_files`.
