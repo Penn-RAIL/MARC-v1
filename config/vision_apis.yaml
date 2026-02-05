@@ -1,0 +1,7 @@
+vision_apis:
+  - name: "Your Vision API"
+    api_key_env: "YOUR_API_KEY"
+    api_type: "companyname" 
+    endpoint: "https://your-api.com/endpoint"
+    model: "your-model-name"
+    enabled: true
