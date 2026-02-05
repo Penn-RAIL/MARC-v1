@@ -11,3 +11,16 @@ agents:
     model: "gemini-2.0-flash"
     prompt_file: "agent_3_prompt.txt"
     context_files: []
+
+# Quality Evaluator Configuration
+evaluator:
+  enabled: true
+  model: "gemini-2.0-flash"
+  prompt_file: "evaluator_prompt.txt"
+  quality_threshold: 70  # Minimum score (0-100) to pass
+  max_iterations: 3      # Maximum refinement iterations
+
+# Feedback Loop Settings
+feedback_loop:
+  enabled: true
+  verbose: true  # Print detailed evaluation scores

@@ -1,0 +1,177 @@
+Image Number,Modality,Organ System ,Question,Ground Truth
+EM_01,MRI,BRAIN,Is the lesion showed with an arrow in the left or right hemisphere?,Left hemisphere
+EM_02,MRI,BRAIN,"Given the relative positions of A and B, in which cerebral hemisphere is the ring-enhancing lesion located?",B
+EM_03,MRI,BRAIN,Mark a point in the left crus cerebri,X' is showing left crus cerebri
+EM_04,MRI,BRAIN,Circle the fourth ventricle ,Yellow circle 
+EM_05,MRI,BRAİN,What is point A?,Frontal horn of the right lateral ventricle
+EM_05,MRI,BRAIN,"""What is the position of point A in reference to B?”",It is located at the same hemisphere inferior to point A representing body of the right lateral ventricle
+EM_06,XRAY,CHEST,What is point B?,Trachea
+EM_06,XRAY,CHEST,"""What is the position of point A in reference to B?”",Point A is located right to the point B
+EM_07,CT,ABDOMEN,"Color the portal vein blue, inferior vena cava red and the aorta yellow.","Blue tract: Portal vein, Red circle: Inferior vena cava axial slice, Yellow circle: Abdominal aorta axial slice"
+EM_08,CT,THORAX,Mark the left ventricle of the heart,X is marking the left ventricle of the heart
+EM_09,CT,THORAX,What is point A?,A: Thoracic aorta
+EM_09,CT,THORAX,What is point B?,B: Vertebra
+EM_09,CT,THORAX,"""What is the position of point B in reference to A?”",B is located posterior to point A
+EM_10,CT,PANCREAS,Mark the head of the pancreas,A is marking the head of the pancreas
+EM_11,CT,PANCREAS,Mark the body of the pancreas,B is marking the body of the pancreas
+EM_11,CT,PANCREAS,Mark the tail of the pancreas,C is marking the tail of the pancreas
+EM_12,CT,THORAX,What is point A?,A is right main bronchus
+EM_12,CT,THORAX,What is point B?,B is left main bronchus
+EM_12,CT,THORAX,"Color the left upper lobe of the lung red, lower lobe of the lung blue","Red area: Left lung upper lobe, Blue area: Left Lung lower lobe"
+EM_13,CT,THORAX,Indicate the left oblique fissure separating left lung into upper and lower lobes,Blue arrow is left oblique fissure
+EM_14,CT,VERTEBRA,What is A?,A is body of thoracic vertebra
+EM_14,CT,VERTEBRA,What is B?,B is spinous process of thoracic vertebra
+EM_15,CT,ABDOMEN,Which letter is indicating upper pole of left kidney?,A is indicating upper pole of left kidney
+EM_15,CT,ABDOMEN,Which letter is indicating lower pole of left kidney?,B is indicating lower pole of left kidney
+EM_15,CT,ABDOMEN,What is the location of hypodense cyst of the left kidney indicated by an arrow,Cyst is located at middle zone of the left kidney
+EM_16,SCOUT-XRAY,SCOUT OF THE BODY,What is the side of hip prosthesis?,Hip prosthesis is indicated by an arrow and located at the right hip.
+EM_16,SCOUT-XRAY,SCOUT OF THE BODY,What is point A?,A is left femur
+EM_17,CT,THORAX,"Color the trachea red, esophagus green","Trachea is colored with red, esophagus is colored with green"
+EM_18,CT,THORAX,What is the location of esophagus (B) in reference to trachea (A) ,The esophagus (B) is located posterior to the cervical part of trachea (A)
+EM_19,MRI,BRAIN,Mark the head of caudate nucleus,B is head of caudate nucleus
+EM_19,MRI,BRAIN,Mark the thalamus,A is thalamus
+EM_20,MRI,BRAIN,“Which structure is superior to the lateral ventricle on sagittal image,Corpus callosum is superior to lateral ventricle (A) highlighted by yellow
+EM_21,CT,ABDOMEN,Which part of the colon is indicated with A,A is descending colon
+EM_21,CT,ABDOMEN,What is B?,B is stomach
+EM_22,CT,THORAX,What is the structure indicated with white arrows?,White arrows:Minor fissure of right lung
+EM_22,CT,THORAX,What is the structure indicated with red arrows?,Red arrows: Major fissure of right lung
+EM_23,CT,ABDOMEN,What is A?,A: Inferior vena cava
+EM_23,CT,ABDOMEN,What is B?,B: Aorta
+EM_23,CT,ABDOMEN,What is the relation of aorta (B) in reference to inferior vena cava (A),Aorta is located at the left side of inferior vena cava
+EM_24,CT,BRAIN,Indicate the  right temporal lobe ,A is indicating right temporal lobe
+EM_24,CT,BRAIN,Indicate the left occipital lobe,B is indicating left occipital lobe
+EM_25,CT,PELVIS,What is the structure B?,B is psoas major muscle
+EM_25,CT,PELVIS,Where is B located in relation to A?,B is located at both lateral sides of A (Vertebral body)
+EM_26,MRI,BREAST,Which breast is operated?,Right breast is operated (A)
+EM_27,MRI,BREAST,What is point B?,B is liver
+EM_28,CT,ABDOMEN,What is point B?,B is liver
+EM_28,CT,ABDOMEN,Which structure is anterior to the liver?,Transverse colon (A) is located anterior to the liver
+EM_29,CT,NECK,What is the side of the thyroid nodule outlined in yellow?,Right thyroid lobe
+EM_30,CT,NECK,Where is B originating from?,B is aorta and originating from left ventricle
+EM_30,CT,NECK,What is C?,C is brachiocephalic trunk
+EM_31,CT,BREAST,“Is the breast implant (x) located in the left or right breast?”,X is at left
+EM_32,MRI,BRAIN,Circle superior sagittal sinnus with yellow,Yellow circle: Superior Sagittal sinus
+EM_32,MRI,BRAIN,What are the structures labeled with red circle?,Red circle: Transverse sinus
+EM_33,MRI,HEAD,Color right inferior concha with yellow,Yellow: Right inferior nasal concha
+EM_33,MRI,HEAD,Color right middle nasal concha with red,Red: Middle nasal concha
+EM_34,MRI,HEAD,What is C?,C: Right maxillary sinus
+EM_34,MRI,HEAD,What is D?,D: Right orbita
+BK_01,CT,THORAX,What structure is labeled A?,Aorta   
+BK_02,CT,ABDOMEN,Which label corresponds to the vertebral body in this image?,B
+BK_02,CT,ABDOMEN,What structure is labeled C?,Spleen
+BK_03,SCOUT-XRAY,THORAX,What device is indicated by the red arrow?,Cardiac pacemaker
+BK_03,SCOUT-XRAY,THORAX,Which side of the chest is the device located?,Left side of the chest
+BK_04,MRI,BRAIN,What structure is labeled A?,Left eye globe
+BK_04,MRI,BRAIN,What structure is indicated by the arrow?,Right optic nerve
+BK_04,MRI,BRAIN,"Which MRI sequence is shown in this image, FLAIR or T1-weighted?",FLAIR
+BK_05,MRI,BRAIN,What structure is indicated by the arrow?,Cerebellar hemisphere
+BK_06,MRI,BRAIN,What part of the ventricular system is labeled 1?,Anterior horn of the right lateral ventricle
+BK_06,MRI,BRAIN,"Which diffusion MRI sequence is shown in this image, DWI or ADC ?",ADC 
+BK_06,MRI,BRAIN,"Which of the labels 1, 2, 3, and 4 correspond to the posterior horns of the lateral ventricles?",3 and 4
+BK_07,CT,ABDOMEN,What organ is indicated by the arrow?,Gallbladder
+BK_07,CT,ABDOMEN,Which side of the abdomen is the gallbladder located?,Right
+BK_08,CT,ABDOMEN,Which label corresponds to the pancreas in this image?,4
+BK_08,CT,ABDOMEN,What organ is labeled 3?,Right kidney
+BK_09,CT,THORAX,What structure is labeled A?,Ascending thoracic aorta
+BK_10,CT,THORAX,Which label corresponds to the tracheal bifurcation in this image?,2
+BK_10,CT,THORAX,"Which imaging plane is shown in this CT image, axial, coronal, or sagittal?",Coronal
+BK_11,CT,ABDOMEN,Which label  corresponds to the right kidney in this image?,Label A
+BK_12,CT,THORAX,What structure is indicated by the arrow?,Spinous process of the thoracic vertebra
+BK_13,XRAY,THORAX,What bone is indicated by the arrow?,Right clavicle
+BK_14,CT,ABDOMEN,What structure is indicated by the arrow?,Left adrenal gland
+BK_15,CT,PELVIS,What structure is labeled 1?,Urinary bladder
+BK_16,CT,PELVIS,"Which region appears more hyperdense on this CT image, the area labeled 1 or the region indicated by the arrow tip?",Region indicated by the arrow tip
+BK_17,CT,THORAX,What structure is indicated by the tip of the arrow?,Esophagus
+BK_18,MRI,BRAIN,Which label corresponds to the right lateral ventricle?,Label A
+BK_19,MRI,HEAD/NECK,Which label corresponds to the left maxillary sinus?,Label 4
+BK_19,MRI,HEAD/NECK,What structure is labeled 3?,Left ethmoid air cells
+BK_19,MRI,HEAD/NECK,"Which structure is located more superiorly in this image, the left ethmoid air cells or the left maxillary sinus?",Left ethmoid air cells
+BK_20,MRI,BRAIN,What structure is indicated by the arrow?,Right superior temporal gyrus
+BK_21,MRI,BRAIN,What structure is indicated by the arrow?,Superior sagittal sinus
+BK_22,MRI,BRAIN,Which label  corresponds to the corpus callosum?,Label 1
+BK_22,MRI,BRAIN,What structure is labeled 3?,Pons
+BK_22,MRI,BRAIN,Which label corresponds to the cerebellum?,Label 4
+BK_22,MRI,BRAIN,"Which imaging plane is shown in this MRI image, axial, coronal, or sagittal?",Sagittal
+BK_23,MRI,BRAIN,Which label corresponds to the splenium of the corpus callosum?,Label D
+BK_24,MRI,BRAIN,What lobe of the brain is indicated by the arrow?,Temporal lobe
+BK_25,CT,THORAX,Which label corresponds to the right humeral head in this image?,Label 1
+BK_26,CT,ABDOMEN,What organ is indicated by the arrow?,Spleen
+BK_27,CT,THORAX,Which label corresponds to the ascending aorta in this image?,Label A
+BK_27,CT,THORAX,What structure is labeled C?,Left pulmonary artery
+BK_28,CT,THORAX,What structure is labeled 1?,Apical segment of the right upper lobe
+BK_28,CT,THORAX,Which label corresponds to the trachea?,Label 2
+BK_29,CT,THORAX,What structure is indicated by the arrow?,Right main bronchus
+BK_30,CT,THORAX,What structure is indicated by the arrow?,Body of sternum
+BK_31,CT,THORAX,What structure is indicated by the arrow?,Descending thoracic aorta
+BK_32,CT,ABDOMEN,What structure is indicated by the arrow?,Inferior vena cava
+BK_33,CT,THORAX,What structure is indicated by the arrow?,Right mammary gland
+BK_34,CT,BRAIN,What structure is indicated by the arrow?,Left frontal lobe
+BK_35,CT,ABDOMEN,Which numbered structure represents the right adrenal gland?,2
+BK_36,CT,ABDOMEN,Which organ is labeled C?,Stomach
+BK_37,CT,BRAIN,Which label corresponds to the right optic nerve?,2
+BK_38,CT,BRAIN,Which structure is indicated by the arrow?,Right lateral ventricle
+BK_39,CT,ABDOMEN,What structure is indicated by the arrow?,Left ureter
+BK_40,CT,ABDOMEN,Which label corresponds to the right kidney?,2
+BK_41,CT,ABDOMEN,Which label corresponds to the left lobe of the liver?,B
+BK_41,CT,ABDOMEN,Which labeled liver lobe occupies a larger area in this image?,A
+BK_42,CT,PELVIS,Which structure is indicated by the arrow?,Prostate gland
+ES_01,CT,CHEST,What is the structure labeled A?,Right Pulmonary Artery (RPA)
+ES_01,CT,CHEST,What is the structure labeled B?,Left Pulmonary Artery (LPA)
+ES_02,MRI,BREAST,What is the structure indicated by red arrow?,Pectoralis Muscle
+ES_02,MRI,BREAST,What is the structure indicated by blue arrow?,Nipple/Areolar Region
+ES_03,CT,ABDOMEN AND PELVIS,What is the structure labeled A?,Iliacus Muscle
+ES_03,CT,ABDOMEN AND PELVIS,What is the structure labeled B?,Psoas Major Muscle
+ES_03,CT,ABDOMEN AND PELVIS,What is the structure indicated by red circle?,Hip Joint
+ES_04,CT,ABDOMEN,What is the structure labeled A?,Liver
+ES_04,CT,ABDOMEN,What is the structure labeled B?,Right Kidney
+ES_04,CT,ABDOMEN,What is the structure labeled C?,Left Kidney
+ES_04,CT,ABDOMEN,What is the structure labeled D?,Stomach
+ES_04,CT,ABDOMEN,What is the structure labeled E?,Small Bowel Loops
+ES_05,CT,ABDOMEN,What is the structure painted in red?,Abdominal Aorta
+ES_05,CT,ABDOMEN,What is the structure painted in blue?,Inferior Vena Cava
+ES_05,CT,ABDOMEN,What is the structure labeled P?,Pancreas
+ES_06,CT,ABDOMEN,What is the structure labeled L?,Liver
+ES_06,CT,ABDOMEN,What is the structure labeled G?,Gallbladder
+ES_06,CT,ABDOMEN,What is the structure labeled S?,Spleen
+ES_07,MRI,SPINE,What is the structure painted in red?,Spinal Cord
+ES_07,MRI,SPINE,What is the structure indicated by yellow circle?,Vertebra
+ES_07,MRI,SPINE,What is the structure indicated by blue arrow?,Anterior Longitudinal Ligament
+ES_08,CT,PELVIS,What is the structure painted in red?,Pubic Symphysis
+ES_08,CT,PELVIS,What is the structure labeled A?,Ischium
+ES_08,CT,PELVIS,What is the structure labeled B?,Femoral Head
+ES_09,CT,PELVIS,What is the structure indicated by red star?,Rectum
+ES_09,CT,PELVIS,What is the structure indicated by yellow star?,Bladder
+ES_10,X-RAY,WRIST,What is the structure labeled A?,Radius
+ES_10,X-RAY,WRIST,What is the structure labeled B?,Ulna
+ES_10,X-RAY,WRIST,What is the structure labeled C?,Scaphoid
+ES_10,X-RAY,WRIST,What is the structure labeled D?,Lunate
+ES_10,X-RAY,WRIST,What is the structure labeled F?,Capitate
+ES_10,X-RAY,WRIST,What is the structure labeled E?,Hamate
+ES_11,X-RAY,HAND,What is the structure indicated by blue star?,Metacarpal Bones
+ES_11,X-RAY,HAND,What is the structure indicated by yellow star?,Proximal Phalanges
+ES_11,X-RAY,HAND,What is the structure indicated by red star?,Middle Phalanges
+ES_11,X-RAY,HAND,What is the structure indicated by green star?,Distal Phalanges
+ES_12,CT,CHEST,What is the structure labeled A?,Superior Vena Cava
+ES_12,CT,CHEST,What is the structure labeled B?,Ascedinding Aorta
+ES_12,CT,CHEST,What is the structure labeled C?,Pulmonary Trunk
+ES_12,CT,CHEST,What is the structure labeled D?,Descending Aorta
+ES_13,X-RAY,HAND,What is the view of the structure shown in the image?,Lateral Hand X-Ray
+ES_14,X-RAY,HAND,What is the structure indicated by blue arrow?,MCP
+ES_14,X-RAY,HAND,What is the structure indicated by yellow arrow?,DIP
+ES_14,X-RAY,HAND,What is the structure indicated by red arrow?,PIP
+ES_14,X-RAY,HAND,What is the structure indicated by green arrow?,Carpometacarpal Joint
+ES_15,MRI,PROSTATE,What is the structure painted in red?,Peripheral Zone
+ES_16,MRI,HEAD,What is the structure indicated by blue star?,Cerebellum
+ES_16,MRI,HEAD,What is the structure indicated by red star?,Fourth Ventricle
+ES_16,MRI,HEAD,What is the structure indicated by pink star?,Eye
+ES_17,MRI,PROSTATE,What is the structure painted in blue?,Transitional Zone
+ES_18,MRI,PROSTATE,What is the structure indicated by yellow arrow?,Rectum
+ES_19,MRI,HEAD,What is the structure indicated by yellow star?,Pons
+ES_19,MRI,HEAD,What is the structure indicated by green star?,Temporal Lobe
+ES_19,MRI,HEAD,What is the structure indicated by red arrow?,Cerebellopontine Angle
+ES_20,MRI,PELVIS,What is the structure labeled A?,Bladder
+ES_20,MRI,PELVIS,What is the structure labeled B?,Uterus
+ES_20,MRI,PELVIS,What is the structure labeled C?,Rectum
+ES_21,MRI,PELVIS,What is the structure indicated by red arrow?,Pouch of Douglas (Rectouterine Pouch)
+ES_21,MRI,PELVIS,What is the structure indicated by red star?,Pubic Symphysis
+ES_21,MRI,PELVIS,What is the structure indicated by blue star?,Vagina

@@ -1,8 +1,13 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 import os
+import json
+import re
+import base64
+from pathlib import Path
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
+from langchain_core.messages import HumanMessage
 try:
     from langchain_community.vectorstores import Chroma
     from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -70,8 +75,29 @@ class GenericAgent:
             self.retriever = self.vectorstore.as_retriever()
             print(f"[{self.name}] RAG initialized with {len(docs)} chunks from {len(self.context_files)} files.")
 
-    def run(self, input_text: str, previous_agent_output: Optional[str] = None) -> str:
-        """Runs the agent on the input query."""
+    def _encode_image(self, image_path: str) -> dict:
+        """Encode image to base64 for multimodal LLM."""
+        with open(image_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+        
+        # Determine MIME type
+        suffix = Path(image_path).suffix.lower()
+        mime_types = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.gif': 'image/gif',
+            '.webp': 'image/webp'
+        }
+        mime_type = mime_types.get(suffix, 'image/jpeg')
+        
+        return {
+            "type": "image_url",
+            "image_url": f"data:{mime_type};base64,{encoded_string}"
+        }
+
+    def run(self, input_text: str, previous_agent_output: Optional[str] = None, image_path: Optional[str] = None, feedback: Optional[str] = None) -> str:
+        """Runs the agent on the input query with optional image input and feedback."""
         
         context_str = ""
         if self.retriever:
@@ -79,10 +105,7 @@ class GenericAgent:
             relevant_docs = self.retriever.invoke(input_text)
             context_str = "\n\nRelevant Context from Knowledge Base:\n" + "\n".join([d.page_content for d in relevant_docs])
         
-        # Prepare the full prompt
-        # We use a human message to contain the input and previous output
-        # to avoid curly brace parsing issues in the previous output.
-        
+        # Prepare the text input
         instruction_prompt = self.prompt_template.replace("{input}", "{{input}}")
         
         input_data = f"Original Input: {input_text}"
@@ -91,16 +114,64 @@ class GenericAgent:
              
         if context_str:
             input_data += f"\n{context_str}"
-            
-        # Using a list of messages is safer than a single large template string
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", instruction_prompt),
-            ("human", "{input_data}")
-        ])
         
-        chain = prompt | self.llm
+        # Inject feedback from evaluator if provided
+        if feedback:
+            input_data += f"\n\n=== FEEDBACK FOR IMPROVEMENT ===\n{feedback}\n=== Please address the above feedback in your response ==="
+        
+        # If image is provided, use multimodal message format
+        if image_path and os.path.exists(image_path):
+            print(f"[{self.name}] Processing with image: {image_path}")
+            
+            # Create multimodal message with both text and image
+            message_content = [
+                {"type": "text", "text": f"System Instructions: {instruction_prompt}\n\n{input_data}"}
+            ]
+            
+            # Add image
+            image_data = self._encode_image(image_path)
+            message_content.append(image_data)
+            
+            # Use direct message invocation for multimodal
+            response = self.llm.invoke([HumanMessage(content=message_content)])
+            
+        else:
+            # Text-only processing (original behavior)
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", instruction_prompt),
+                ("human", "{input_data}")
+            ])
+            
+            chain = prompt | self.llm
+            response = chain.invoke({"input_data": input_data})
         
         print(f"--- Running {self.name} ---")
-        response = chain.invoke({"input_data": input_data})
-        
         return response.content
+    
+    @staticmethod
+    def parse_evaluation(evaluation_output: str) -> Dict[str, Any]:
+        """Parse JSON evaluation output from evaluator agent."""
+        try:
+            # Try to extract JSON from markdown code blocks if present
+            json_match = re.search(r'```(?:json)?\s*({.*?})\s*```', evaluation_output, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1)
+            else:
+                # Try to find raw JSON in the output
+                json_match = re.search(r'{.*}', evaluation_output, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group(0)
+                else:
+                    json_str = evaluation_output
+            
+            result = json.loads(json_str)
+            return result
+        except json.JSONDecodeError as e:
+            print(f"Warning: Failed to parse evaluation JSON: {e}")
+            # Return a default structure if parsing fails
+            return {
+                "overall_score": 0,
+                "agent_scores": {},
+                "feedback": {},
+                "pass": False
+            }
