@@ -1,0 +1,41 @@
+# MARC v1 and MedGemma Baseline Deployments for HELM / MedHELM
+#
+# Run both servers before starting HELM evaluation:
+#   python server.py                # MARC pipeline on port 8080
+#   python baseline_server.py       # MedGemma baseline on port 8081
+
+model_deployments:
+  # --- MARC multi-agent pipeline (port 8080) ---
+  - name: marc/marc-v1-http
+    model_name: marc/marc-v1
+    tokenizer_name: google/gemma-3-4b-it
+    max_sequence_length: 32768
+    client_spec:
+      class_name: "helm.clients.http_model_client.HTTPModelClient"
+      args:
+        base_url: "http://localhost:8080"
+        timeout: 120000  # 120 seconds — pipeline involves multiple LLM calls
+
+  # --- MedGemma baseline single model (port 8081) ---
+  - name: medgemma/medgemma-4b-it-http
+    model_name: medgemma/medgemma-4b-it
+    tokenizer_name: google/gemma-3-4b-it
+    max_sequence_length: 32768
+    client_spec:
+      class_name: "helm.clients.http_model_client.HTTPModelClient"
+      args:
+        base_url: "http://localhost:8081"
+        timeout: 60000
+
+  # --- Option C: In-process MARC client ---
+  # Uncomment and adjust marc_base_dir to use.
+  # - name: marc/marc-v1-direct
+  #   model_name: marc/marc-v1
+  #   tokenizer_name: google/gemma-3-4b-it
+  #   max_sequence_length: 32768
+  #   client_spec:
+  #     class_name: "helm_client.MARCClient"
+  #     args:
+  #       marc_base_dir: "/path/to/MARC-v1"
+  #       config_path: "config/agents.yaml"
+  #       prompts_dir: "prompts"
