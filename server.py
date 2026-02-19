@@ -22,9 +22,11 @@ Environment variables:
 
 import os
 import re
+import csv
 import base64
 import logging
 import tempfile
+from datetime import datetime
 from typing import Optional, List
 from contextlib import asynccontextmanager
 
@@ -75,12 +77,56 @@ class ProcessResponse(BaseModel):
 
 pipeline: Optional[MARCPipeline] = None
 output_mode: str = "final"
+log_file: Optional[str] = None
+request_counter: int = 0
+
+
+def _init_log_file(base_dir: str) -> str:
+    """Create a timestamped CSV log file and write the header."""
+    logs_dir = os.path.join(base_dir, "logs")
+    os.makedirs(logs_dir, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    path = os.path.join(logs_dir, f"marc_server_{timestamp}.csv")
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            "request_id", "timestamp", "prompt", "response",
+            "agent_1_output", "agent_2_output", "agent_3_output",
+            "iterations", "eval_score", "quality_passed", "request_time_s",
+        ])
+    return path
+
+
+def _log_result(prompt: str, response_text: str, result: PipelineResult):
+    """Append a row to the CSV log."""
+    global request_counter
+    if log_file is None:
+        return
+    request_counter += 1
+    try:
+        with open(log_file, "a", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                request_counter,
+                datetime.now().isoformat(),
+                prompt,
+                response_text,
+                result.agent_outputs.get("agent_1", ""),
+                result.agent_outputs.get("agent_2", ""),
+                result.agent_outputs.get("agent_3", ""),
+                result.iterations,
+                result.final_score,
+                result.quality_passed,
+                f"{result.request_time:.2f}",
+            ])
+    except Exception as e:
+        logger.warning("Failed to write log: %s", e)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize the MARC pipeline once at server startup."""
-    global pipeline, output_mode
+    global pipeline, output_mode, log_file
 
     base_dir = os.environ.get(
         "MARC_BASE_DIR", os.path.dirname(os.path.abspath(__file__))
@@ -88,6 +134,9 @@ async def lifespan(app: FastAPI):
     config_path = os.environ.get("MARC_CONFIG", "config/agents.yaml")
     prompts_dir = os.environ.get("MARC_PROMPTS_DIR", "prompts")
     output_mode = os.environ.get("MARC_OUTPUT_MODE", "final")
+
+    log_file = _init_log_file(base_dir)
+    logger.info("Logging results to %s", log_file)
 
     logger.info("Initializing MARC pipeline (base_dir=%s, config=%s)", base_dir, config_path)
     pipeline = MARCPipeline(
@@ -160,6 +209,9 @@ async def process(request: ProcessRequest) -> ProcessResponse:
     # Handle echo_prompt
     if request.echo_prompt:
         response_text = request.prompt + response_text
+
+    # Log result
+    _log_result(request.prompt, response_text, result)
 
     return ProcessResponse(
         text=response_text,

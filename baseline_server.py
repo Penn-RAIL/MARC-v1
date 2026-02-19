@@ -18,10 +18,12 @@ Environment variables:
 
 import os
 import re
+import csv
 import base64
 import logging
 import tempfile
 import time
+from datetime import datetime
 from typing import Optional, List
 from contextlib import asynccontextmanager
 
@@ -69,12 +71,53 @@ class ProcessResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 model: Optional[LocalModel] = None
+log_file: Optional[str] = None
+request_counter: int = 0
+
+
+def _init_log_file() -> str:
+    """Create a timestamped CSV log file and write the header."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    logs_dir = os.path.join(base_dir, "logs")
+    os.makedirs(logs_dir, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    path = os.path.join(logs_dir, f"baseline_server_{timestamp}.csv")
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            "request_id", "timestamp", "prompt", "response", "request_time_s",
+        ])
+    return path
+
+
+def _log_result(prompt: str, response_text: str, elapsed: float):
+    """Append a row to the CSV log."""
+    global request_counter
+    if log_file is None:
+        return
+    request_counter += 1
+    try:
+        with open(log_file, "a", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                request_counter,
+                datetime.now().isoformat(),
+                prompt,
+                response_text,
+                f"{elapsed:.2f}",
+            ])
+    except Exception as e:
+        logger.warning("Failed to write log: %s", e)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global model
+    global model, log_file
     model_name = os.environ.get("BASELINE_MODEL", "google/medgemma-4b-it")
+
+    log_file = _init_log_file()
+    logger.info("Logging results to %s", log_file)
+
     logger.info("Loading baseline model: %s", model_name)
     model = LocalModel.get(model_name)
     logger.info("Baseline model ready")
@@ -128,6 +171,9 @@ async def process(request: ProcessRequest) -> ProcessResponse:
 
     if request.echo_prompt:
         response_text = request.prompt + response_text
+
+    # Log result
+    _log_result(request.prompt, response_text, elapsed)
 
     return ProcessResponse(
         text=response_text,
