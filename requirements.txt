@@ -7,3 +7,10 @@ langchain-chroma
 chromadb
 langchain-community
 langchain-text-splitters
+fastapi
+uvicorn[standard]
+torch
+transformers
+accelerate
+sentence-transformers
+Pillow

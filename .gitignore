@@ -7,6 +7,7 @@ keys.env
 venv/
 env/
 ENV/
+.env
 
 # Python
 __pycache__/

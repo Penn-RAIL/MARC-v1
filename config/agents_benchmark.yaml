@@ -1,3 +1,7 @@
+# Benchmark configuration for MedHELM evaluation
+# Feedback loop is disabled for faster single-pass evaluation.
+# Use this config when running: MARC_CONFIG=config/agents_benchmark.yaml python server.py
+
 agents:
   - name: "Agent 1"
     model: "google/medgemma-4b-it"
@@ -15,16 +19,16 @@ agents:
     prompt_file: "agent_3_prompt.txt"
     context_files: []
 
-# Quality Evaluator Configuration
+# Evaluator disabled for benchmarking speed
 evaluator:
-  enabled: true
+  enabled: false
   model: "google/medgemma-4b-it"
   backend: "local"
   prompt_file: "evaluator_prompt.txt"
-  quality_threshold: 70  # Minimum score (0-100) to pass
-  max_iterations: 3      # Maximum refinement iterations
+  quality_threshold: 70
+  max_iterations: 1
 
-# Feedback Loop Settings
+# Feedback loop disabled
 feedback_loop:
-  enabled: true
-  verbose: true  # Print detailed evaluation scores
+  enabled: false
+  verbose: false

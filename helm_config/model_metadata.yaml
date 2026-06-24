@@ -1,0 +1,25 @@
+models:
+  - name: marc/marc-v1
+    display_name: MARC v1 (Multi-Agent Report Classification)
+    description: >
+      Multi-agent pipeline with 3 sequential agents (Tagger, Classifier,
+      Recommender) and an iterative quality evaluator feedback loop,
+      powered by MedGemma 4B-IT running locally on GPU.
+    creator_organization_name: Penn RAIL
+    access: open
+    num_parameters: 0  # Pipeline of multiple model calls, not a single model
+    release_date: "2025-01-01"
+    tags:
+      - TEXT_MODEL_TAG
+
+  - name: medgemma/medgemma-4b-it
+    display_name: MedGemma 4B-IT (Baseline)
+    description: >
+      Google MedGemma 4B-IT running locally on GPU. Single-model baseline
+      for comparison against the MARC multi-agent pipeline.
+    creator_organization_name: Google
+    access: open
+    num_parameters: 4000000000
+    release_date: "2025-01-01"
+    tags:
+      - TEXT_MODEL_TAG

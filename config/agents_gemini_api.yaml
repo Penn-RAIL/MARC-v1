@@ -1,30 +1,33 @@
+# Original Gemini API configuration (preserved for reference)
+# To use: MARC_CONFIG=config/agents_gemini_api.yaml python server.py
+
 agents:
   - name: "Agent 1"
-    model: "google/medgemma-4b-it"
-    backend: "local"
+    model: "gemini-2.0-flash"
+    backend: "api"
     prompt_file: "agent_1_prompt.txt"
     context_files: []
   - name: "Agent 2"
-    model: "google/medgemma-4b-it"
-    backend: "local"
+    model: "gemini-2.0-flash"
+    backend: "api"
     prompt_file: "agent_2_prompt.txt"
     context_files: ["data/knowledge/sample_knowledge.txt"]
   - name: "Agent 3"
-    model: "google/medgemma-4b-it"
-    backend: "local"
+    model: "gemini-2.0-flash"
+    backend: "api"
     prompt_file: "agent_3_prompt.txt"
     context_files: []
 
 # Quality Evaluator Configuration
 evaluator:
   enabled: true
-  model: "google/medgemma-4b-it"
-  backend: "local"
+  model: "gemini-2.0-flash"
+  backend: "api"
   prompt_file: "evaluator_prompt.txt"
-  quality_threshold: 70  # Minimum score (0-100) to pass
-  max_iterations: 3      # Maximum refinement iterations
+  quality_threshold: 70
+  max_iterations: 3
 
 # Feedback Loop Settings
 feedback_loop:
   enabled: true
-  verbose: true  # Print detailed evaluation scores
+  verbose: true
