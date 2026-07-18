@@ -1,5 +1,6 @@
 from typing import List, Optional, Any
 import os
+import re
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
@@ -53,6 +54,7 @@ def clean_model_output(text: str) -> str:
     for bad in ("\u00a0", "\u200b", "\ufeff"):
         text = text.replace(bad, " " if bad == "\u00a0" else "")
 
+    text = re.sub(r"<unused\d+>", " ", text)
     return text.strip()
 
 
