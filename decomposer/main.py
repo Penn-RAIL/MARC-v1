@@ -74,7 +74,6 @@ def _write_decomposition(decomp: dict):
     print("Updating agent prompts...")
 
     for i, spec in enumerate(decomp["agents"]):
-        label = labels[i]
         filename = f"agent_{i + 1}_prompt.txt"
         path = os.path.join(PROMPTS_DIR, filename)
         with open(path, "w") as f:
