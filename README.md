@@ -3,7 +3,7 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-![MARC Logo](Marc.png)
+![MARC Logo](assets/marc-logo.png)
 
 A multi-agent AI system for processing, analyzing, and extracting structured information from complex documents with **iterative feedback refinement** for maximum accuracy.
 
@@ -150,7 +150,7 @@ python main.py
 
 **Run specialized tests**:
 ```bash
-python list_models.py  # Verify available Google models
+python scripts/list_models.py  # Verify available Google models
 ```
 
 ## Project Structure

@@ -5,17 +5,12 @@ include prompts/*.txt
 include data/*.csv
 
 # Include documentation
-include readme.md
 include README.md
 include LICENSE
-include FEEDBACK_LOOP_TEST_RESULTS.md
+include docs/evaluation/feedback-loop-results.md
 
 # Include configuration examples
 include .env.example
-
-# Include test files
-include test_feedback_loop.py
-include test_feedback_loop_strict.py
 
 # Exclude sensitive files
 exclude .env
