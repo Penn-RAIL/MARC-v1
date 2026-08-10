@@ -13,10 +13,15 @@ from langchain_core.documents import Document
 #   "ollama" -> local Ollama models (requires a running ollama server)
 #
 # Default is "gemini" to preserve the repository's original behavior.
-# Override without editing code via environment variable:
-#     export MARC_BACKEND=ollama
+# Override without editing code via environment variable (in .env or the
+# shell): MARC_BACKEND=ollama
+#
+# Resolved lazily (per-agent, not at module import time) so it works
+# regardless of whether the caller loads .env before or after importing
+# this module.
 # ============================================================
-LLM_BACKEND = os.getenv("MARC_BACKEND", "gemini").lower()  # "gemini" | "ollama"
+def _resolve_backend() -> str:
+    return os.getenv("MARC_BACKEND", "gemini").lower()
 
 
 # Backend-specific defaults for the model name, so each provider gets a
@@ -73,15 +78,16 @@ class GenericAgent:
     ):
         self.name = name
         self.prompt_template = prompt_template
+        self.backend = _resolve_backend()
         # Fall back to the backend-appropriate default model if none given.
-        self.model_name = model_name or _DEFAULT_MODELS.get(LLM_BACKEND)
+        self.model_name = model_name or _DEFAULT_MODELS.get(self.backend)
         self.context_files = context_files or []
         self.retriever = None
 
         # --- Backend selection -------------------------------------------
         # Imports are inside each branch so you only need the packages for
         # the backend you actually use.
-        if LLM_BACKEND == "gemini":
+        if self.backend == "gemini":
             from langchain_google_genai import ChatGoogleGenerativeAI
 
             api_key = os.getenv("GOOGLE_API_KEY")
@@ -97,7 +103,7 @@ class GenericAgent:
                 temperature=temperature,
             )
 
-        elif LLM_BACKEND == "ollama":
+        elif self.backend == "ollama":
             from langchain_ollama import ChatOllama
 
             # NOTE: this branch reproduces the exact ChatOllama call the
@@ -116,7 +122,7 @@ class GenericAgent:
 
         else:
             raise ValueError(
-                f"Unknown MARC_BACKEND: {LLM_BACKEND!r}. "
+                f"Unknown MARC_BACKEND: {self.backend!r}. "
                 "Expected 'gemini' or 'ollama'."
             )
 
@@ -148,7 +154,7 @@ class GenericAgent:
         docs = text_splitter.split_documents(documents)
 
         # Embeddings backend matches the LLM backend.
-        if LLM_BACKEND == "gemini":
+        if self.backend == "gemini":
             from langchain_google_genai import GoogleGenerativeAIEmbeddings
             embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
         else:  # ollama
@@ -175,17 +181,28 @@ class GenericAgent:
                 [d.page_content for d in relevant_docs]
             )
 
-        # The generated prompts use {input} and {previous_agent_output} as
-        # real template variables, so supply both. Append RAG context (if any)
-        # onto the previous-output slot.
+        # Decomposer-generated prompts reference {input} and
+        # {previous_agent_output} directly in the system template, so both
+        # are supplied as template variables. But static prompt files (e.g.
+        # prompts/agent_2_prompt.txt) only reference {input} - if
+        # previous_agent_output were *only* passed as a template variable,
+        # it would silently never reach the LLM for those prompts, since
+        # str.format() ignores unused kwargs. To guarantee prior-step output
+        # and RAG context are never dropped, they're always also folded into
+        # the human message content explicitly, regardless of what the
+        # system prompt text references.
         prev = previous_agent_output or ""
         if context_str:
             prev = f"{prev}\n{context_str}"
 
+        human_content = f"Original Input: {input_text}"
+        if prev:
+            human_content += f"\n\nInput from previous step:\n{prev}"
+
         prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", self.prompt_template),
-                ("human", "{input}"),
+                ("human", "{human_content}"),
             ]
         )
 
@@ -195,6 +212,7 @@ class GenericAgent:
         response = chain.invoke({
             "input": input_text,
             "previous_agent_output": prev,
+            "human_content": human_content,
         })
 
         return clean_model_output(response.content)
