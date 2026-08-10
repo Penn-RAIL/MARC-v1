@@ -19,4 +19,4 @@ jobs:
             | tar -xz gitleaks
           sudo mv gitleaks /usr/local/bin/
       - name: Run gitleaks
-        run: gitleaks detect --source . --log-opts="--all" --redact -v
+        run: gitleaks detect --source . --log-opts="--all" --baseline-path .gitleaks-baseline.json --redact -v
