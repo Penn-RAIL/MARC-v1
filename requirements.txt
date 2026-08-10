@@ -1,9 +1,0 @@
-langchain-google-genai
-langchain-core
-pandas
-python-dotenv
-pydantic
-langchain-chroma
-chromadb
-langchain-community
-langchain-text-splitters

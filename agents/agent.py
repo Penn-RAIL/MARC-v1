@@ -40,7 +40,6 @@ try:
 except ImportError:
     RAG_AVAILABLE = False
 
-
 def clean_model_output(text: str) -> str:
     """
     Normalize raw LLM text before downstream JSON extraction.
