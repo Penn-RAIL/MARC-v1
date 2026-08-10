@@ -11,8 +11,6 @@ try:
 except ImportError:
     RAG_AVAILABLE = False
 
-# Fallback keys (to be replaced by env vars)
-HARDCODED_GOOGLE_API_KEY = "TODO_CHANGE_ME"
 
 class GenericAgent:
     def __init__(

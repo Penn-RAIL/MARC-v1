@@ -1,6 +1,6 @@
 # MARC v1 – Multi-Agent Reasoning & Coordination
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10-3.13](https://img.shields.io/badge/python-3.10--3.13-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ![MARC Logo](assets/marc-logo.png)
@@ -75,7 +75,10 @@ When quality scores fall below the configurable threshold:
 
 3. **Install dependencies**
     ```bash
-    pip install -r requirements.txt
+    pip install -e .          # core dependencies only
+    pip install -e ".[rag]"   # + retrieval-augmented context support
+    pip install -e ".[viz]"   # + evaluation visualization scripts
+    pip install -e ".[dev]"   # + testing/linting tools
     ```
 
 4. **Configure API key**
@@ -161,12 +164,16 @@ MARC v1/
 │   └── agent.py        # GenericAgent implementation
 ├── config/             # Pipeline configuration
 │   └── agents.yaml     # YAML-based agent definitions
+├── decomposer/         # Ollama-based query decomposition pipeline
 ├── prompts/            # Agent prompt templates
 ├── data/               # Input data and knowledge bases
 │   └── knowledge/      # Text files for RAG
+├── assets/             # Logo and static assets
+├── docs/               # Additional documentation
+├── scripts/            # Standalone utility scripts
 ├── main.py             # Main entry point and interactive CLI
-├── requirements.txt    # Project dependencies
-└── readme.md           # Documentation
+├── pyproject.toml      # Project metadata and dependencies
+└── README.md           # Documentation
 ```
 
 ## Performance & Optimization
