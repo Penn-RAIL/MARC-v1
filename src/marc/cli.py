@@ -1,8 +1,16 @@
 import argparse
+import sys
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
-from .config import DEFAULT_CONFIG_PATH, DECOMPOSED_CONFIG_PATH, load_pipeline, write_decomposed_pipeline
+from .config import (
+    DEFAULT_CONFIG_PATH,
+    DECOMPOSED_CONFIG_PATH,
+    check_environment,
+    load_pipeline,
+    write_decomposed_pipeline,
+)
+from .exceptions import ConfigError
 from .pipeline import run_pipeline
 
 
@@ -65,6 +73,7 @@ def _interactive_loop(pipeline) -> None:
 
 
 def cmd_run(args: argparse.Namespace) -> None:
+    check_environment()
     config_path = args.config or DEFAULT_CONFIG_PATH
     print(f"Welcome to MARC — loading pipeline from {config_path}")
     pipeline = load_pipeline(config_path)
@@ -81,8 +90,12 @@ def cmd_decompose(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    load_dotenv("keys.env")
-    load_dotenv()
+    # usecwd=True: search from the directory the command is actually run
+    # from, not from this installed package's source location (the default
+    # search walks up from the calling file, which for an installed/editable
+    # package can find an unrelated .env in some parent directory).
+    load_dotenv(find_dotenv("keys.env", usecwd=True))
+    load_dotenv(find_dotenv(usecwd=True))
 
     parser = argparse.ArgumentParser(prog="marc", description="MARC multi-agent pipeline")
     subparsers = parser.add_subparsers(dest="command")
@@ -105,7 +118,11 @@ def main() -> None:
         parser.print_help()
         return
 
-    args.func(args)
+    try:
+        args.func(args)
+    except ConfigError as e:
+        print(f"\nError: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

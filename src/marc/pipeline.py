@@ -20,7 +20,7 @@ from langchain_core.documents import Document
 # regardless of whether the caller loads .env before or after importing
 # this module.
 # ============================================================
-def _resolve_backend() -> str:
+def resolve_backend() -> str:
     return os.getenv("MARC_BACKEND", "gemini").lower()
 
 
@@ -77,7 +77,7 @@ class GenericAgent:
     ):
         self.name = name
         self.prompt_template = prompt_template
-        self.backend = _resolve_backend()
+        self.backend = resolve_backend()
         # Fall back to the backend-appropriate default model if none given.
         self.model_name = model_name or _DEFAULT_MODELS.get(self.backend)
         self.context_files = context_files or []
@@ -91,8 +91,8 @@ class GenericAgent:
 
             api_key = os.getenv("GOOGLE_API_KEY")
             if not api_key:
-                from dotenv import load_dotenv
-                load_dotenv("keys.env")
+                from dotenv import find_dotenv, load_dotenv
+                load_dotenv(find_dotenv("keys.env", usecwd=True))
                 api_key = os.getenv("GOOGLE_API_KEY")
 
             # Gemini does not use num_predict / num_ctx (Ollama-specific).
