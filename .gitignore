@@ -69,8 +69,8 @@ test_feedback_loop_strict.py
 # Data (optional - uncomment if you want to exclude data)
 # data/*.csv
 
-# Decomposer generated artifacts
-prompts/agent_1_prompt.txt
-prompts/agent_2_prompt.txt
-prompts/agent_3_prompt.txt
+# Decomposer generated artifacts (marc decompose) - prompts/agent_1/2/3_prompt.txt
+# are the tracked default pipeline's prompts, not decomposer output, so they
+# are intentionally not listed here.
+prompts/decomposed_agent_*_prompt.txt
 config/decomposed_agents.yaml
