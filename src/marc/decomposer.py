@@ -6,7 +6,7 @@ from typing import Optional
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
 
-from agents.agent import clean_model_output
+from .pipeline import clean_model_output
 
 
 class DecomposerAgent:
@@ -22,7 +22,7 @@ class DecomposerAgent:
         temperature: float = 0.7,
         num_predict: int = 2048,
         num_ctx: int = 8192,
-        prompt_file: str = "decomposer/decomp.txt",
+        prompt_file: str = "prompts/decomp.txt",
     ):
         self.ollama_base_url = (
             ollama_base_url

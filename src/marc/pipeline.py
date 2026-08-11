@@ -215,3 +215,12 @@ class GenericAgent:
         })
 
         return clean_model_output(response.content)
+
+
+def run_pipeline(pipeline: List["GenericAgent"], user_input: str) -> Optional[str]:
+    """Runs every agent in sequence, threading each agent's output into the next."""
+    previous_output = None
+    for agent in pipeline:
+        output = agent.run(input_text=user_input, previous_agent_output=previous_output)
+        previous_output = output
+    return previous_output

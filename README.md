@@ -148,7 +148,14 @@ You can assign more powerful models to complex reasoning tasks and faster models
 
 **Run the interactive pipeline**:
 ```bash
-python main.py
+marc run
+```
+
+**Generate a pipeline for a new task (Ollama backend)**:
+```bash
+export MARC_BACKEND=ollama
+marc decompose
+marc run --config config/decomposed_agents.yaml
 ```
 
 **Run specialized tests**:
@@ -160,18 +167,19 @@ python scripts/list_models.py  # Verify available Google models
 
 ```
 MARC v1/
-├── agents/             # Core agent logic
-│   └── agent.py        # GenericAgent implementation
+├── src/marc/           # Package source
+│   ├── cli.py          # `marc run` / `marc decompose` entry points
+│   ├── pipeline.py     # GenericAgent + pipeline execution
+│   ├── config.py       # YAML config loading
+│   └── decomposer.py   # DecomposerAgent (Ollama task decomposition)
 ├── config/             # Pipeline configuration
 │   └── agents.yaml     # YAML-based agent definitions
-├── decomposer/         # Ollama-based query decomposition pipeline
 ├── prompts/            # Agent prompt templates
 ├── data/               # Input data and knowledge bases
 │   └── knowledge/      # Text files for RAG
 ├── assets/             # Logo and static assets
 ├── docs/               # Additional documentation
 ├── scripts/            # Standalone utility scripts
-├── main.py             # Main entry point and interactive CLI
 ├── pyproject.toml      # Project metadata and dependencies
 └── README.md           # Documentation
 ```

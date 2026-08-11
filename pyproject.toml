@@ -56,10 +56,7 @@ dev = [
 Repository = "https://github.com/Penn-RAIL/MARC-v1"
 
 [project.scripts]
-marc = "main:main"
-
-[tool.setuptools]
-py-modules = ["main"]
+marc = "marc.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["agents*", "decomposer*"]
+where = ["src"]
