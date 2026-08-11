@@ -74,7 +74,6 @@ def _write_decomposition(decomp: dict):
     print("Updating agent prompts...")
 
     for i, spec in enumerate(decomp["agents"]):
-        label = labels[i]
         filename = f"agent_{i + 1}_prompt.txt"
         path = os.path.join(PROMPTS_DIR, filename)
         with open(path, "w") as f:
@@ -86,7 +85,7 @@ def _write_decomposition(decomp: dict):
             "prompt_file": filename,
             "context_files": [],
             "temperature": 0.0,
-            "num_predict": 256,
+            "num_predict": 1024,
             "num_ctx": 3072,
         })
 
@@ -117,7 +116,7 @@ def load_pipeline() -> list:
             prompt_template=prompt,
             context_files=cfg.get("context_files", []),
             temperature=cfg.get("temperature", 0.0),
-            num_predict=cfg.get("num_predict", 256),
+            num_predict=cfg.get("num_predict", 1024),
             num_ctx=cfg.get("num_ctx", 3072),
         )
         pipeline.append(agent)
