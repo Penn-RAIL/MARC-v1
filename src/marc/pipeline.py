@@ -5,31 +5,7 @@ import re
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
 
-# ============================================================
-# MODEL BACKEND SWITCH
-# ------------------------------------------------------------
-# Chooses which LLM provider the agents run on.
-#   "gemini" -> Google Gemini API   (requires GOOGLE_API_KEY)
-#   "ollama" -> local Ollama models (requires a running ollama server)
-#
-# Default is "gemini" to preserve the repository's original behavior.
-# Override without editing code via environment variable (in .env or the
-# shell): MARC_BACKEND=ollama
-#
-# Resolved lazily (per-agent, not at module import time) so it works
-# regardless of whether the caller loads .env before or after importing
-# this module.
-# ============================================================
-def resolve_backend() -> str:
-    return os.getenv("MARC_BACKEND", "gemini").lower()
-
-
-# Backend-specific defaults for the model name, so each provider gets a
-# sensible model if the caller/config does not specify one.
-_DEFAULT_MODELS = {
-    "gemini": "gemini-1.5-flash",
-    "ollama": "MedAIBase/MedGemma1.5:4b",
-}
+from .providers import get_provider, resolve_backend
 
 # RAG embedding backends are imported lazily inside _initialize_rag so that
 # users only need the dependencies for the backend they actually run.
@@ -39,6 +15,7 @@ try:
     RAG_AVAILABLE = True
 except ImportError:
     RAG_AVAILABLE = False
+
 
 def clean_model_output(text: str) -> str:
     """
@@ -55,8 +32,8 @@ def clean_model_output(text: str) -> str:
     text = text.replace("\r\n", "\n").replace("\r", "\n")
 
     # Remove non-breaking spaces and zero-width characters that break parsers
-    for bad in ("\u00a0", "\u200b", "\ufeff"):
-        text = text.replace(bad, " " if bad == "\u00a0" else "")
+    for bad in (" ", "​", "﻿"):
+        text = text.replace(bad, " " if bad == " " else "")
 
     text = re.sub(r"<unused\d+>", " ", text)
     return text.strip()
@@ -78,52 +55,22 @@ class GenericAgent:
         self.name = name
         self.prompt_template = prompt_template
         self.backend = resolve_backend()
-        # Fall back to the backend-appropriate default model if none given.
-        self.model_name = model_name or _DEFAULT_MODELS.get(self.backend)
+        self.provider = get_provider(self.backend)
+        self.model_name = model_name or self.provider.default_model
         self.context_files = context_files or []
         self.retriever = None
 
-        # --- Backend selection -------------------------------------------
-        # Imports are inside each branch so you only need the packages for
-        # the backend you actually use.
-        if self.backend == "gemini":
-            from langchain_google_genai import ChatGoogleGenerativeAI
-
-            api_key = os.getenv("GOOGLE_API_KEY")
-            if not api_key:
-                from dotenv import find_dotenv, load_dotenv
-                load_dotenv(find_dotenv("keys.env", usecwd=True))
-                api_key = os.getenv("GOOGLE_API_KEY")
-
-            # Gemini does not use num_predict / num_ctx (Ollama-specific).
-            self.llm = ChatGoogleGenerativeAI(
-                model=self.model_name,
-                google_api_key=api_key,
-                temperature=temperature,
-            )
-
-        elif self.backend == "ollama":
-            from langchain_ollama import ChatOllama
-
-            # NOTE: this branch reproduces the exact ChatOllama call the
-            # pipeline has been benchmarked with — do not change these
-            # kwargs without re-running the benchmarks.
-            llm_kwargs = dict(
-                model=self.model_name,
-                temperature=temperature,
-                num_predict=num_predict,
-                num_ctx=num_ctx,
-            )
-            if ollama_base_url:
-                llm_kwargs["base_url"] = ollama_base_url
-
-            self.llm = ChatOllama(**llm_kwargs)
-
-        else:
-            raise ValueError(
-                f"Unknown MARC_BACKEND: {self.backend!r}. "
-                "Expected 'gemini' or 'ollama'."
-            )
+        # NOTE: the Ollama num_predict/num_ctx values reproduce the exact
+        # call the pipeline has been benchmarked with — do not change them
+        # without re-running the benchmarks. GoogleProvider ignores these,
+        # since Gemini doesn't use them.
+        self.llm = self.provider.build_llm(
+            model_name=self.model_name,
+            temperature=temperature,
+            num_predict=num_predict,
+            num_ctx=num_ctx,
+            base_url=ollama_base_url,
+        )
 
         # Initialize RAG if context files exist
         if self.context_files:
@@ -152,14 +99,7 @@ class GenericAgent:
         text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
         docs = text_splitter.split_documents(documents)
 
-        # Embeddings backend matches the LLM backend.
-        if self.backend == "gemini":
-            from langchain_google_genai import GoogleGenerativeAIEmbeddings
-            embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-        else:  # ollama
-            from langchain_ollama import OllamaEmbeddings
-            # Requires an embedding model pulled, e.g.: ollama pull nomic-embed-text
-            embeddings = OllamaEmbeddings(model="nomic-embed-text")
+        embeddings = self.provider.build_embeddings()
 
         # Ephemeral in-memory vector store, one per agent (V1 simplicity).
         self.vectorstore = Chroma.from_documents(docs, embeddings)

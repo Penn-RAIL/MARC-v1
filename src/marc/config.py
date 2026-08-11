@@ -4,7 +4,8 @@ import yaml
 from pydantic import ValidationError
 
 from .exceptions import ConfigError
-from .pipeline import GenericAgent, resolve_backend
+from .pipeline import GenericAgent
+from .providers import resolve_backend
 from .schemas import PipelineConfig
 
 PROMPTS_DIR = "prompts"
