@@ -1,5 +1,5 @@
 # MARC v1 — Multi-Agent Reasoning and Coordination
-[![arXiv](https://img.shields.io/badge/arXiv-ARXIV_ID-b31b1b.svg)]([https://arxiv.org/abs/2608.13476](https://arxiv.org/abs/2608.13476))
+[![arXiv](https://img.shields.io/badge/arXiv-2608.13476-b31b1b.svg)](https://arxiv.org/abs/2608.13476)
 [![Python 3.10-3.13](https://img.shields.io/badge/python-3.10--3.13-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
